@@ -54,10 +54,11 @@ TEST(Frobnicate, FooBar) {
     EXPECT_GT(x, 4);
 }
 
-int main(int argc, const char* argv[]) {
+int main(int argc, char* argv[]) {
 
     // return Catch::Session().run(argc, argv);
 
+    ::testing::InitGoogleTest(&argc, argv);
     auto ret = RUN_ALL_TESTS();
 
     printf("naive_conv done\n");
