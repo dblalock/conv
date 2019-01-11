@@ -7,6 +7,8 @@
 
 #include <gtest/gtest.h>
 
+#include "arrayview.hpp"
+
 // #define CATCH_CONFIG_RUNNER
 // #include "catch.hpp"
 
@@ -22,7 +24,7 @@ template<class DataT, class CoeffT,
 void conv2dx2d_valid_rowmajor(
     const DataT* img_data, int img_nrows, int img_ncols,
     const CoeffT* filt_data, int filt_nrows, int filt_ncols,
-    CoeffT* out)
+    CoeffT* out_data)
 {
     auto nrow_positions = img_nrows - filt_nrows + 1;
     auto ncol_positions = img_ncols - filt_ncols + 1;
@@ -32,35 +34,19 @@ void conv2dx2d_valid_rowmajor(
     assert(nrow_positions > 0);
     assert(ncol_positions > 0);
 
+    auto in = ar::make_view(img_data, img_nrows, img_ncols);
+    auto filt = ar::make_view(filt_data, filt_nrows, filt_ncols);
+    auto out = ar::make_view(out_data, out_nrows, out_ncols);
+
     for (int i = 0; i < nrow_positions; i++) {
-        auto out_row_offset = out_ncols * i; // adjust if strided
         for (int j = 0; j < nrow_positions; j++) {
-            auto out_col_offset = j;  // adjust if strided
-            auto out_idx = out_row_offset + out_col_offset;
+            out[{i, j}] = 0;
             for (int k = 0; k < nrow_positions; k++) {
                 for (int l = 0; l < nrow_positions; l++) {
-
-
+                    out[{i, j}] += in[{i + k, j + l}] * filt[{k, l}];
                 }
             }
         }
     }
 }
 
-
-TEST(Frobnicate, FooBar) {
-    auto x = 5;
-    EXPECT_EQ(x, 5);
-    EXPECT_GT(x, 4);
-}
-
-int main(int argc, char* argv[]) {
-
-    // return Catch::Session().run(argc, argv);
-
-    ::testing::InitGoogleTest(&argc, argv);
-    auto ret = RUN_ALL_TESTS();
-
-    printf("naive_conv done\n");
-    return ret;
-}

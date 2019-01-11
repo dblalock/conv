@@ -10,9 +10,13 @@ NVCCFLAGS := -O3 -std=c++14 -Icuda-api-wrappers/src
 # LDFLAGS := -lgtest -lgtest_main -lpthread -L/usr/lib
 LDFLAGS := -lgtest -lbenchmark -lpthread -L/usr/lib
 
-GTEST_DIR := /usr
+TEST_FILES := test_naive_conv.o
+BENCHMARK_FILES := benchmark_dummy.o
 
-all: vec_add.out naive_conv.out benchmark_dummy.out
+TESTS_BINARY := tests.out
+BENCHMARKS_BINARY := bench.out
+
+all: tests benchmarks vec_add.out
 	@echo making all...
 
 # naive_conv.out: naive_conv.o
@@ -23,11 +27,23 @@ all: vec_add.out naive_conv.out benchmark_dummy.out
 # 	@echo ------------------------ Compiling $@ ...
 # 	$(CXX) $(CXXFLAGS) $< -c -o $@
 
+# tests: $(TEST_FILES) test_main.o
+# .PHONY: tests
+
+tests: tests_main.o $(TEST_FILES)
+	$(CXX) $(CXXFLAGS) tests_main.o $(TEST_FILES) $(LDFLAGS) -o $(TESTS_BINARY)
+# test_main.out: test_main.o
+# test_main.o: $(TEST_FILES)
+
+benchmarks: benchmarks_main.o $(BENCHMARK_FILES)
+	$(CXX) $(CXXFLAGS) benchmarks_main.o $(BENCHMARK_FILES) $(LDFLAGS) -o $(BENCHMARKS_BINARY)
+
+
 %.out: %.cu
 	@echo ------------------------ Compiling $@ ...
 	$(NVCC) $(NVCCFLAGS) $< -o $@
 
-%.cu.o: %.cu
+%.o: %.cu
 	@echo ------------------------ Compiling $@ ...
 	$(NVCC) $(NVCCFLAGS) $< -c -o $@
 

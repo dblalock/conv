@@ -15,4 +15,3 @@ static void BM_StringCopy(benchmark::State& state) {
 }
 BENCHMARK(BM_StringCopy);
 
-BENCHMARK_MAIN();
