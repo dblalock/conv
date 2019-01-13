@@ -8,3 +8,8 @@ TEST(NaiveConv, DidItWork) {
     EXPECT_GT(x, 4);
 }
 
+TEST(NaiveConv, 1x1) {
+    auto x = 5;
+    EXPECT_EQ(x, 5);
+    EXPECT_GT(x, 4);
+}

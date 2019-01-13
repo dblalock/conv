@@ -10,13 +10,15 @@ NVCCFLAGS := -O3 -std=c++14 -Icuda-api-wrappers/src
 # LDFLAGS := -lgtest -lgtest_main -lpthread -L/usr/lib
 LDFLAGS := -lgtest -lbenchmark -lpthread -L/usr/lib
 
-TEST_FILES := test_naive_conv.o
-BENCHMARK_FILES := benchmark_dummy.o
+TEST_FILES := test/tests_main.o test/test_naive_conv.o
+BENCHMARK_FILES := bench/benchmarks_main.o bench/benchmark_dummy.o
 
-TESTS_BINARY := tests.out
-BENCHMARKS_BINARY := bench.out
+TESTS_BINARY := bin/tests.out
+BENCHMARKS_BINARY := bin/bench.out
 
-all: tests benchmarks vec_add.out
+# TESTS_MAIN_OBJ = test/tests_main.o
+
+all: tests benchmarks vec_add
 	@echo making all...
 
 # naive_conv.out: naive_conv.o
@@ -30,13 +32,17 @@ all: tests benchmarks vec_add.out
 # tests: $(TEST_FILES) test_main.o
 # .PHONY: tests
 
-tests: tests_main.o $(TEST_FILES)
-	$(CXX) $(CXXFLAGS) tests_main.o $(TEST_FILES) $(LDFLAGS) -o $(TESTS_BINARY)
+tests: $(TEST_FILES)
+	$(CXX) $(CXXFLAGS) $(TEST_FILES) $(LDFLAGS) -o $(TESTS_BINARY)
 # test_main.out: test_main.o
 # test_main.o: $(TEST_FILES)
 
-benchmarks: benchmarks_main.o $(BENCHMARK_FILES)
-	$(CXX) $(CXXFLAGS) benchmarks_main.o $(BENCHMARK_FILES) $(LDFLAGS) -o $(BENCHMARKS_BINARY)
+benchmarks: $(BENCHMARK_FILES)
+	$(CXX) $(CXXFLAGS) $(BENCHMARK_FILES) $(LDFLAGS) -o $(BENCHMARKS_BINARY)
+
+.PHONY: vec_add.out
+vec_add: vec_add.out
+	$(shell mv vec_add.out bin/)
 
 
 %.out: %.cu
@@ -47,6 +53,7 @@ benchmarks: benchmarks_main.o $(BENCHMARK_FILES)
 	@echo ------------------------ Compiling $@ ...
 	$(NVCC) $(NVCCFLAGS) $< -c -o $@
 
+# .cpp.o:
 %.o: %.cpp
 	@echo ------------------------ Compiling $@ ...
 	$(CXX) $(CXXFLAGS) $< -c -o $@
