@@ -305,7 +305,9 @@ template<> struct idxs_from_flat_idx<4, StorageOrders::NCHW> {
 // know that it is if it's never been sliced/selected from except as one
 // contiguous slice along major axis; probably replace int Order here with
 // int Attrs, where low bits are Order and higher bits for contiguous and
-// potential other info (such as storage format (eg, rle compressed))
+// potential other info (such as storage format (eg, rle compressed), or
+// padding info); and maybe do nums mod 10 as indicators so options are
+// legible in dbg msgs (eg, 457 = 4,5,7, instead of inscrutable bit combo)
 template<class Ax0=AxisContig, class Ax1=AxisUnused,
          class Ax2=AxisUnused, class Ax3=AxisUnused,
          int Order=StorageOrders::Unspecified>

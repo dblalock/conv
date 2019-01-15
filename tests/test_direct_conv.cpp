@@ -3,12 +3,12 @@
 #include "../src/eigen/Eigen/Core"
 #include "../src/eigen/unsupported/Eigen/CXX11/Tensor"
 
-#include "../src/naive_conv.hpp"
+#include "../src/direct_conv.hpp"
 
 template<class DataT>
 using Ar2D = Eigen::Tensor<DataT, 2, Eigen::RowMajor>;
 
-TEST(NaiveConv, DidItWork) {
+TEST(DirectConv, DidItWork) {
     auto x = 5;
     EXPECT_EQ(x, 5);
     EXPECT_GT(x, 4);
@@ -37,7 +37,7 @@ TEST(Sanity, EigenTensor) {
 
 
 
-TEST(NaiveConv, X_2x3) {
+TEST(DirectConv, X_2x3_rowmajor) {
     auto nrows = 2;
     auto ncols = 3;
     Ar2D<float> X(nrows, ncols);
