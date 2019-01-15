@@ -300,6 +300,12 @@ template<> struct idxs_from_flat_idx<4, StorageOrders::NCHW> {
 
 // ------------------------------------------------ axis type
 
+// TODO need some type information for whether the whole thing is one
+// contiguous chunk of memory or not; this is the common case, but can only
+// know that it is if it's never been sliced/selected from except as one
+// contiguous slice along major axis; probably replace int Order here with
+// int Attrs, where low bits are Order and higher bits for contiguous and
+// potential other info (such as storage format (eg, rle compressed))
 template<class Ax0=AxisContig, class Ax1=AxisUnused,
          class Ax2=AxisUnused, class Ax3=AxisUnused,
          int Order=StorageOrders::Unspecified>
@@ -316,6 +322,9 @@ struct Axes {
         Ax0::is_used + Ax1::is_used + Ax2::is_used + Ax3::is_used;
     static const bool is_any_ax_contig =
         Ax0::is_contig || Ax1::is_contig || Ax2::is_contig || Ax3::is_contig;
+
+    // XXX if rank 3 or more, one ax will be strided even if whole array is one
+    // contiguous chunk of memory
     static const bool is_dense = (rank >= 1) &&
         (Ax0::is_dense || !Ax0::is_used) &&
         (Ax1::is_dense || !Ax1::is_used) &&
