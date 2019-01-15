@@ -5,8 +5,8 @@
 
 #include "../src/direct_conv.hpp"
 
-template<class DataT>
-using Ar2D = Eigen::Tensor<DataT, 2, Eigen::RowMajor>;
+template<class DataT> using Ar2D = Eigen::Tensor<DataT, 2, Eigen::RowMajor>;
+template<class DataT> using Ar3D = Eigen::Tensor<DataT, 3, Eigen::RowMajor>;
 
 TEST(DirectConv, DidItWork) {
     auto x = 5;
@@ -37,7 +37,7 @@ TEST(Sanity, EigenTensor) {
 
 
 
-TEST(DirectConv, X_2x3_rowmajor) {
+TEST(DirectConv, 2dx2d_rowmajor) {
     auto nrows = 2;
     auto ncols = 3;
     Ar2D<float> X(nrows, ncols);
@@ -86,6 +86,84 @@ TEST(DirectConv, X_2x3_rowmajor) {
             for (int j = 0; j < ncol_positions; j++) {
                 EXPECT_EQ(out(i, j), ans(i, j)) << "i, j = " << i << ", " << j;
             }
+        }
+    }
+}
+TEST(DirectConv, 3dx3d_hwc) {
+    auto nrows = 3;
+    auto ncols = 3;
+    auto nchan = 2;
+    Ar3D<float> X(nrows, ncols, nchan);
+    auto filt_nrows = 2;
+    auto filt_ncols = 2;
+    Ar3D<float> filt(filt_nrows, filt_ncols, nchan);
+    auto nrow_positions = nrows - filt.dimensions()[0] + 1;
+    auto ncol_positions = ncols - filt.dimensions()[1] + 1;
+    Ar2D<float> out(nrow_positions, ncol_positions);
+    Ar2D<float> ans(nrow_positions, ncol_positions);
+    for (int i = 0; i < X.size(); i++) { X.data()[i] = i; }
+    for (int i = 0; i < filt.size(); i++) {
+        static float vals[8] = {1,0,-1,0, 0,1,0,-1};
+        filt.data()[i] = vals[i % 8];
+        // filt.data()[i] = (i % 2 ? 1 : -1) * (i % 4 > 1 ? 1 : -1); // 1,-1,-1,1
+    }
+    // ans(0, 0) = X(0,0,0) - X(0,1,0) + X(1,0,1) - X(1,1,1);
+    // ans(0, 1) = X(0,1,0) - X(0,2,0) + X(1,1,1) - X(1,2,1);
+    for (int i = 0; i < nrow_positions; i++) {
+        for (int j = 0; j < ncol_positions; j++) {
+            ans(i, j) = X(i,j,0) - X(i,1+j,0) + X(1+i,0+j,1) - X(1+i,1+j,1);
+        }
+    }
+
+    conv3dx3d_valid_hwc(X.data(), nrows, ncols,
+        filt.data(), filt_nrows, filt_ncols, nchan, out.data());
+
+    for (int i = 0; i < nrow_positions; i++) {
+        for (int j = 0; j < ncol_positions; j++) {
+            EXPECT_EQ(out(i, j), ans(i, j)) << "i, j = " << i << ", " << j;
+        }
+    }
+}
+TEST(DirectConv, 3dx3d_chw) {
+    auto nrows = 3;
+    auto ncols = 3;
+    auto nchan = 2;
+    Ar3D<float> X(nchan, nrows, ncols);
+    auto filt_nrows = 2;
+    auto filt_ncols = 2;
+    Ar3D<float> filt(filt_nrows, filt_ncols, nchan);
+    auto nrow_positions = nrows - filt.dimensions()[0] + 1;
+    auto ncol_positions = ncols - filt.dimensions()[1] + 1;
+    Ar2D<float> out(nrow_positions, ncol_positions);
+    Ar2D<float> ans(nrow_positions, ncol_positions);
+    for (int i = 0; i < X.size(); i++) { X.data()[i] = i; }
+    for (int i = 0; i < filt.size(); i++) {
+        static float vals[8] = {1,0,0,-1, 0,1,-1,0};
+        filt.data()[i] = vals[i % 8];
+    }
+
+    for (int i = 0; i < nrow_positions; i++) {
+        for (int j = 0; j < ncol_positions; j++) {
+            ans(i, j) = X(0,i,j) - X(0,1+i,1+j) + X(1,0+i,1+j) - X(1,1+i,0+j);
+            // ans(i, j) = X(i,j,0) - X(i,1+j,0) + X(1+i,0+j,1) - X(1+i,1+j,1);
+            // printf("ans(%d,%d) = %g\n", i, j, ans(i, j));
+        }
+    }
+
+    // for (int c = 0; c < nchan; c++) {
+    //     for (int i = 0; i < nrows; i++) {
+    //         for (int j = 0; j < ncols; j++) {
+    //             printf("X(%d,%d,%d) = %g\n", c, i, j, X(c, i, j));
+    //         }
+    //     }
+    // }
+
+    conv3dx3d_valid_chw(X.data(), nrows, ncols,
+        filt.data(), filt_nrows, filt_ncols, nchan, out.data());
+
+    for (int i = 0; i < nrow_positions; i++) {
+        for (int j = 0; j < ncol_positions; j++) {
+            EXPECT_EQ(out(i, j), ans(i, j)) << "i, j = " << i << ", " << j;
         }
     }
 }
