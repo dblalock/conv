@@ -11,7 +11,7 @@ NVCCFLAGS := -O3 -std=c++14 -Icuda-api-wrappers/src
 # LDFLAGS := -lgtest -lgtest_main -lpthread -L/usr/lib
 LDFLAGS := -lgtest -lbenchmark -lpthread -L/usr/lib
 
-TEST_FILES := tests/tests_main.o tests/test_direct_conv.o
+TEST_FILES := tests/tests_main.o tests/test_direct_conv.o tests/test_cat_conv.o
 BENCHMARK_FILES := bench/benchmarks_main.o bench/benchmark_dummy.o
 
 TESTS_BINARY := bin/tests.out
@@ -23,6 +23,9 @@ all: tests benchmarks vec_add
 	@echo making all...
 
 tests/test_direct_conv.o: tests/test_direct_conv.cpp src/direct_conv.hpp
+	$(CXX) $(CXXFLAGS) $< -c -o $@
+
+tests/test_cat_conv.o: tests/test_catconv.cpp src/catconv.hpp
 	$(CXX) $(CXXFLAGS) $< -c -o $@
 
 # direct_conv.out: direct_conv.o

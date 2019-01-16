@@ -7,17 +7,11 @@
 #define _direct_conv_hpp
 
 #include <assert.h>
-#include <utility>
 #include <stdio.h>
 
 #include "arrayview.hpp"
+#include "dtype_traits.hpp"
 
-
-template<class T1, class T2>
-struct scalar_traits {
-    using sum_type = decltype(std::declval<T1>() + std::declval<T2>());
-    using prod_type = decltype(std::declval<T1>() * std::declval<T2>());
-};
 
 // only allow valid convolution
 template<class DataT, class CoeffT,
