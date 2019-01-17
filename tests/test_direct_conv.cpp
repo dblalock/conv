@@ -132,8 +132,8 @@ TEST(DirectConv, 3dx3d_chw) {
     auto filt_nrows = 2;
     auto filt_ncols = 2;
     Ar3D<float> filt(filt_nrows, filt_ncols, nchan);
-    auto nrow_positions = nrows - filt.dimensions()[0] + 1;
-    auto ncol_positions = ncols - filt.dimensions()[1] + 1;
+    auto nrow_positions = nrows - filt_nrows + 1;
+    auto ncol_positions = ncols - filt_ncols + 1;
     Ar2D<float> out(nrow_positions, ncol_positions);
     Ar2D<float> ans(nrow_positions, ncol_positions);
     for (int i = 0; i < X.size(); i++) { X.data()[i] = i; }
