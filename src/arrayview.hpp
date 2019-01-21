@@ -321,10 +321,11 @@ struct Axes {
     // static const int debug = false; // TODO rm
 
     static const int order = Order;
-    static const int rank =
-        Ax0::is_used + Ax1::is_used + Ax2::is_used + Ax3::is_used;
+    static const int rank = Ax0::is_used + Ax1::is_used + Ax2::is_used +
+        Ax3::is_used + Ax4::is_used;
     static const bool is_any_ax_contig =
-        Ax0::is_contig || Ax1::is_contig || Ax2::is_contig || Ax3::is_contig;
+        Ax0::is_contig || Ax1::is_contig || Ax2::is_contig ||
+            Ax3::is_contig || Ax4::is_contig;
 
     // XXX if rank 3 or more, one ax will be strided even if whole array is one
     // contiguous chunk of memory
@@ -392,7 +393,7 @@ struct setStaticSizes {
     using AxisT1 = SET_AXIS_SIZE(AxesT, 1, StaticDim1);
     using AxisT2 = SET_AXIS_SIZE(AxesT, 2, StaticDim2);
     using AxisT3 = SET_AXIS_SIZE(AxesT, 3, StaticDim3);
-    using AxisT4 = SET_AXIS_SIZE(AxesT, 3, StaticDim4);
+    using AxisT4 = SET_AXIS_SIZE(AxesT, 4, StaticDim4);
     static const int order = AxesT::order;
     using type = Axes<AxisT0, AxisT1, AxisT2, AxisT3, AxisT4, order>;
 };
@@ -429,7 +430,7 @@ std::array<IdxT, AxesT::rank> default_strides_for_shape(
     static const int rank = AxesT::rank;
     static const int order = AxesT::order;
     static_assert(rank >= 0, "Rank must be >= 0!");
-    static_assert(rank <= 4, "Rank must be <= 4!");
+    static_assert(rank <= 5, "Rank must be <= 5!");
     // TODO rm rank <= 2 after debug
     static_assert(rank <= 2 || AxesT::is_dense, "Only dense axes can use default strides!");
     static_assert(rank <= 2 || order != StorageOrders::Unspecified,
