@@ -54,3 +54,4 @@ TEST(CatConv, 2d_hw_chw_valid) {
         }
     }
 }
+

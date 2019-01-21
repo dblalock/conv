@@ -554,6 +554,21 @@ struct ArrayView {
 
     const shape_t& shape() const { return _shape; }
     const shape_t& strides() const { return _strides; }
+    const IdxT size() const {
+        IdxT sz = 1;
+        for (int i = 0; i < rank; i++) {
+            sz *= _shape[i];
+        }
+        return sz;
+    }
+
+    void setZero() {
+        static_assert(AxesT::is_dense,
+            "setZero() only implemented for dense arrayviews!");
+        if (AxesT::is_dense) {
+            memset(_data, 0, sizeof(DataT)*size());
+        }
+    }
 
 private:
     DataT *const _data;

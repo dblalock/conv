@@ -7,6 +7,7 @@
 
 template<class DataT> using Ar2D = Eigen::Tensor<DataT, 2, Eigen::RowMajor>;
 template<class DataT> using Ar3D = Eigen::Tensor<DataT, 3, Eigen::RowMajor>;
+template<class DataT> using Ar4D = Eigen::Tensor<DataT, 4, Eigen::RowMajor>;
 
 TEST(DirectConv, DidItWork) {
     auto x = 5;
@@ -167,3 +168,28 @@ TEST(DirectConv, 3dx3d_chw) {
         }
     }
 }
+
+TEST(CatConv, 2d_nchw_gchw_valid) {
+    auto nimgs = 6;
+    auto nchan = 4;
+    auto nrows = 5;
+    auto ncols = 3;
+    Ar4D<float> X(nimgs, nchan, nrows, ncols);
+    auto nout = 3;
+    auto filt_nrows = 2;
+    auto filt_ncols = 2;
+    Ar4D<float> filt(nout, nchan, filt_nrows, filt_ncols);
+    auto nrow_positions = nrows - filt_nrows + 1;
+    auto ncol_positions = ncols - filt_ncols + 1;
+    Ar4D<float> out(nimgs, nout, nrow_positions, ncol_positions);
+    Ar4D<float> ans(nimgs, nout, nrow_positions, ncol_positions);
+    for (int i = 0; i < X.size(); i++) { X.data()[i] = i % 7; }
+    for (int i = 0; i < filt.size(); i++) {
+        static float vals[8] = {1,0,-1,2, -2,3,4,-3};
+        filt.data()[i] = vals[i % 8];
+    }
+
+    conv2d_nchw_x_gchw_valid(X.data(), nimgs, nchan, nrows, ncols,
+        filt.data(), nout, filt_nrows, filt_ncols, out.data());
+}
+
