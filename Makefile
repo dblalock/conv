@@ -4,7 +4,7 @@
 CXX := g++
 NVCC := nvcc
 # CXXFLAGS := -std=c++14 -DEIGEN_MPL2_ONLY
-CXXFLAGS := -Ofast -march=native -std=c++14 -DEIGEN_MPL2_ONLY
+CXXFLAGS := -Ofast -march=native -std=c++14 -DEIGEN_MPL2_ONLY -fno-rtti
 NVCCFLAGS := -O3 -std=c++14 -Icuda-api-wrappers/src
 # INCLUDE_FLAGS := -Icuda-api-wrappers/src
 
