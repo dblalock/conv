@@ -98,4 +98,38 @@ void cat2cat_conv2d_nchw_x_gvchw_valid(
     }
 }
 
+// do the argmax
+template<class ExcitationT, class IdxT>
+void argmax_nchw_activations(
+    const ExcitationT* exc_data, int nimgs, int nchan, int nrows, int ncols,
+    IdxT* out_idxs, int out_nvars, ExcitationT* maxes_tmp)
+{
+    IdxT group_sz = static_cast<IdxT>(nchan / out_nvars);
+    assert(group_sz * out_nvars == nchan); // TODO different group sizes?
+
+    // auto in = ar::make_view(exc_data, nimgs, nchan, nrows, ncols);
+    auto in = ar::make_view(exc_data, nimgs, out_nvars, (int)group_sz, nrows, ncols);
+    auto out = ar::make_view(out_idxs, nimgs, out_nvars, nrows, ncols);
+    auto maxes = ar::make_view(maxes_tmp, nrows, ncols);
+
+    for (int n = 0; n < nimgs; n++) { // each img
+        for (int g = 0; g < out_nvars; g++) { // each output channel
+            maxes.setValue(std::numeric_limits<ExcitationT>::lowest());
+            for (IdxT c = 0; c < group_sz; c++) { // each neuron in group
+                for (int i = 0; i < nrows; i++) { // each row
+                    for (int j = 0; j < ncols; j++) { // each col
+                        auto excitation = in[{n,g,c,i,j}];
+                        // use "<=" so out can't be undefined, even if
+                        // excitation is min possible value for its type
+                        if (maxes[{i, j}] <= excitation) {
+                            out[{n,g,i,j}] = c;
+                            maxes[{i, j}] = excitation;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 #endif // _catconv_hpp

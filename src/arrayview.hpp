@@ -563,12 +563,32 @@ struct ArrayView {
         return sz;
     }
 
-    void setZero() {
+    void setValue(DataT val) {
         static_assert(AxesT::is_dense,
-            "setZero() only implemented for dense arrayviews!");
+            "setValue() only implemented for dense arrayviews!");
         if (AxesT::is_dense) {
-            memset(_data, 0, sizeof(DataT)*size());
+            // use memset if it will preserve correctness
+            if (sizeof(val) == 1) {
+                memset(_data, val, size());
+                // DataT converted = ((DataT)((unsigned char)val));
+                // if (converted == val) {
+                //     memset(_data, val, sizeof(DataT)*size());
+                // }
+            } else {
+                for (IdxT i = 0; i < size(); i++) {
+                    _data[i] = val;
+                }
+            }
         }
+    }
+
+    void setZero() {
+        setValue(0);
+        // static_assert(AxesT::is_dense,
+        //     "setZero() only implemented for dense arrayviews!");
+        // if (AxesT::is_dense) {
+        //     memset(_data, 0, sizeof(DataT)*size());
+        // }
     }
 
 private:

@@ -88,6 +88,13 @@ TEST(CatConv, 2d_nchw_x_gvchw_valid) {
     cat2cat_conv2d_nchw_x_gvchw_valid(X.data(), nimgs, nvars, nrows, ncols,
         filt.data(), nout, ncard, filt_nrows, filt_ncols, out.data());
 
+    Ar2D<float> tmp(nrow_positions, ncol_positions);
+    Ar4D<uint8_t> argmaxes(nimgs, nout, nrow_positions, ncol_positions);
+
+    argmax_nchw_activations(
+        out.data(), nimgs, nout, nrow_positions, ncol_positions,
+        argmaxes.data(), nout / 2, tmp.data());
+
     // for (int i = 0; i < nrow_positions; i++) {
     //     for (int j = 0; j < ncol_positions; j++) {
     //         EXPECT_EQ(out(i, j), ans(i, j)) << "i, j = " << i << ", " << j;
