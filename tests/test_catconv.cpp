@@ -4,6 +4,8 @@
 //
 
 #include <gtest/gtest.h>
+#include "testing_utils.hpp"
+
 // #include "../src/eigen/Eigen/Core"
 #include "../src/eigen/unsupported/Eigen/CXX11/Tensor"
 
