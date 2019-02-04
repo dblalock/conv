@@ -612,6 +612,11 @@ struct GetArrayViewType {
 // ================================================================ wrappers
 // wrappers to make views of different ranks
 
+// TODO have a type for each dim so that you don't get errors about deducing
+// conflicting types for IdxT
+//  -or just make these int64s and static_cast when constructing the ArrayView
+// -also allow decoupling DataT from type of the pointer to allow int4, int2
+
 template<int Order=StorageOrders::RowMajor,
     int StaticDim0=0, int StaticDim1=0, int StaticDim2=0, int StaticDim3=0, int StaticDim4=0,
     class IdxT=DefaultIndexType, class DataT=void>

@@ -112,6 +112,10 @@ void argmax_nchw_activations(
     auto out = ar::make_view(out_idxs, nimgs, out_nvars, nrows, ncols);
     auto maxes = ar::make_view(maxes_tmp, nrows, ncols);
 
+    // TODO this will probably work better with nhwc so that we don't need
+    // temp array for maxes
+    //  -would also make non-orthogonal MCQ easier
+
     for (int n = 0; n < nimgs; n++) { // each img
         for (int g = 0; g < out_nvars; g++) { // each output channel
             maxes.setValue(std::numeric_limits<ExcitationT>::lowest());
@@ -129,6 +133,71 @@ void argmax_nchw_activations(
                 }
             }
         }
+    }
+}
+
+// what I should do is figure out how to slice this such that it returns
+// a tensor of lower rank and implement one recursive function; but the
+// eigen tensor API sucks, so longer, hackier code it is
+template<class EigenTensorT>
+void print_tensor5(const EigenTensorT& tensor, const char* name="") {
+    if (strlen(name)) { printf("%s:\n", name); }
+
+    auto shape = tensor.dimensions();
+
+    // for (int n = 1; n < 2; n++) {
+    for (int n = 0; n < shape[0]; n++) {
+        printf("[");
+        for (int c = 0; c < shape[1]; c++) {
+            if (c > 0) { printf(" "); }
+            printf("[");
+            for (int i = 0; i < shape[2]; i++) {
+                if (i > 0) { printf("\t"); }
+                printf("[");
+                for (int j = 0; j < shape[3]; j++) {
+                    printf("[ ");
+                    for (int k = 0; k < shape[4]; k++) {
+                        std::cout << tensor(n, c, i, j, k);
+                        if (k < shape[4] - 1) { printf(", "); }
+                    }
+                    printf("]");
+                }
+                printf("]");
+            }
+            printf("]");
+            if (c < shape[1] - 1) { printf("\n"); }
+        }
+        printf("]\n");
+        if (n < shape[0] - 1) { printf("\n"); }
+    }
+}
+
+
+template<class EigenTensorT>
+void print_tensor4(const EigenTensorT& tensor, const char* name="") {
+    if (strlen(name)) { printf("%s:\n", name); }
+
+    auto shape = tensor.dimensions();
+
+    // for (int n = 1; n < 2; n++) {
+    for (int n = 0; n < shape[0]; n++) {
+        printf("[");
+        for (int c = 0; c < shape[1]; c++) {
+            if (c > 0) { printf(" "); }
+            printf("[");
+            for (int i = 0; i < shape[2]; i++) {
+                printf("[ ");
+                for (int j = 0; j < shape[3]; j++) {
+                    std::cout << tensor(n, c, i, j);
+                    if (j < shape[3] - 1) { printf(", "); }
+                }
+                printf("]");
+            }
+            printf("]");
+            if (c < shape[1] - 1) { printf("\n"); }
+        }
+        printf("]\n");
+        if (n < shape[0] - 1) { printf("\n"); }
     }
 }
 
