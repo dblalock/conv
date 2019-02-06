@@ -20,7 +20,8 @@ BENCHMARK_FILES := bench/benchmarks_main.o bench/benchmark_dummy.o
 TESTS_BINARY := bin/tests.out
 BENCHMARKS_BINARY := bin/bench.out
 
-OPS_LIBS := lib/zero_out.so lib/catconv_ops.so
+# OPS_LIBS := lib/example_ops.so lib/catconv_ops.so
+OPS_LIBS := lib/example_ops.so
 
 # TESTS_MAIN_OBJ = test/tests_main.o
 
@@ -58,13 +59,13 @@ benchmarks: $(BENCHMARK_FILES)
 
 # ================================================================ ops
 
-ZERO_OUT_DEPS = src/zero_out.cpp
-lib/zero_out.so: $(ZERO_OUT_DEPS)
-	$(CXX) $(CXXFLAGS) -fPIC -shared ${TF_CFLAGS} ${TF_LFLAGS} $(ZERO_OUT_DEPS) -o $@
+EXAMPLE_OPS_DEPS = src/example_ops.cpp
+lib/example_ops.so: $(EXAMPLE_OPS_DEPS)
+	$(CXX) $(CXXFLAGS) -fPIC -shared ${TF_CFLAGS} ${TF_LFLAGS} $(EXAMPLE_OPS_DEPS) -o $@
 
-CATCONV_DEPS := src/catconv_ops.cpp
-lib/catconv_ops.so: $(CATCONV_DEPS)
-	$(CXX) $(CXXFLAGS) -fPIC -shared ${TF_CFLAGS} ${TF_LFLAGS} $(CATCONV_DEPS) -o $@
+# CATCONV_DEPS := src/catconv_ops.cpp
+# lib/catconv_ops.so: $(CATCONV_DEPS)
+# 	$(CXX) $(CXXFLAGS) -fPIC -shared ${TF_CFLAGS} ${TF_LFLAGS} $(CATCONV_DEPS) -o $@
 
 .PHONY: ops
 ops: $(OPS_LIBS)
