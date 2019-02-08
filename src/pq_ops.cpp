@@ -1,5 +1,5 @@
 //
-//  catconv_ops.cpp
+//  pq_ops.cpp
 //  Copyright © 2019 D Blalock. All rights reserved.
 //
 
@@ -13,18 +13,18 @@ using namespace tensorflow;
 
 // TODO allow more than just floats:
 //  -see https://www.tensorflow.org/guide/extend/op#type_polymorphism
-REGISTER_OP("CatConv")
-    .Input("input: int32")
-    .Input("filter: float")
-    .Output("activations: int32")
+REGISTER_OP("PqConv")
+    .Input("input: float")
+    .Input("centroids: float")
+    .Output("assignments: int32")
     .SetShapeFn([](::tensorflow::shape_inference::InferenceContext* c) {
       c->set_output(0, c->input(0));
       return Status::OK();
     });
 
-class CatConvOp : public OpKernel {
+class PqConvOp : public OpKernel {
 public:
-    explicit CatConvOp(OpKernelConstruction* context) : OpKernel(context) {}
+    explicit PqConvOp(OpKernelConstruction* context) : OpKernel(context) {}
 
     void Compute(OpKernelContext* context) override {
         const Tensor& img = context->input(0);
@@ -40,8 +40,6 @@ public:
         TensorShape out_tfshape = img.shape();
         auto nout = filt_shape[0];
         out_tfshape.set_dim(1, nout);
-        out_tfshape.set_dim(2, in_shape[2] - 1);
-        out_tfshape.set_dim(3, in_shape[3] - 1);
 
         Tensor* out_container = nullptr;
         OP_REQUIRES_OK(context, context->allocate_output(
@@ -62,4 +60,4 @@ public:
     }
 };
 
-REGISTER_KERNEL_BUILDER(Name("CatConv").Device(DEVICE_CPU), CatConvOp);
+REGISTER_KERNEL_BUILDER(Name("PqConv").Device(DEVICE_CPU), PqConvOp);

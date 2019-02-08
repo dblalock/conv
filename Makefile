@@ -20,32 +20,19 @@ BENCHMARK_FILES := bench/benchmarks_main.o bench/benchmark_dummy.o
 TESTS_BINARY := bin/tests.out
 BENCHMARKS_BINARY := bin/bench.out
 
-# OPS_LIBS := lib/example_ops.so lib/catconv_ops.so
-OPS_LIBS := lib/example_ops.so
-
-# TESTS_MAIN_OBJ = test/tests_main.o
+OPS_LIBS := lib/example_ops.so lib/catconv_ops.so
+# OPS_LIBS := lib/example_ops.so lib/catconv_ops.so lib/pq_ops.so
 
 all: tests benchmarks vec_add ops
 	@echo making all...
+
+# ================================================================ tests
 
 tests/test_direct_conv.o: tests/test_direct_conv.cpp src/direct_conv.hpp
 	$(CXX) $(CXXFLAGS) $< -c -o $@
 
 tests/test_catconv.o: tests/test_catconv.cpp src/catconv.hpp
 	$(CXX) $(CXXFLAGS) $< -c -o $@
-
-# direct_conv.out: direct_conv.o
-# 	@echo ------------------------ Compiling $@ ...
-# 	$(CXX) $(CXXFLAGS) direct_conv.o $(LDFLAGS) -o direct_conv.out
-
-# direct_conv.o: direct_conv.cpp
-# 	@echo ------------------------ Compiling $@ ...
-# 	$(CXX) $(CXXFLAGS) $< -c -o $@
-
-# tests: $(TEST_FILES) test_main.o
-# .PHONY: tests
-
-# ================================================================ tests
 
 tests: $(TEST_FILES)
 	$(CXX) $(CXXFLAGS) $(TEST_FILES) $(LDFLAGS) -o $(TESTS_BINARY)
@@ -59,13 +46,20 @@ benchmarks: $(BENCHMARK_FILES)
 
 # ================================================================ ops
 
+OP_BUILD_COMMAND = $(CXX) $(CXXFLAGS) -fPIC -shared ${TF_CFLAGS} ${TF_LFLAGS}
+
 EXAMPLE_OPS_DEPS = src/example_ops.cpp
 lib/example_ops.so: $(EXAMPLE_OPS_DEPS)
-	$(CXX) $(CXXFLAGS) -fPIC -shared ${TF_CFLAGS} ${TF_LFLAGS} $(EXAMPLE_OPS_DEPS) -o $@
+	$(OP_BUILD_COMMAND) $^ -o $@
 
-# CATCONV_DEPS := src/catconv_ops.cpp
-# lib/catconv_ops.so: $(CATCONV_DEPS)
-# 	$(CXX) $(CXXFLAGS) -fPIC -shared ${TF_CFLAGS} ${TF_LFLAGS} $(CATCONV_DEPS) -o $@
+CATCONV_DEPS := src/catconv_ops.cpp
+lib/catconv_ops.so: $(CATCONV_DEPS) src/catconv.hpp
+	$(OP_BUILD_COMMAND) $(CATCONV_DEPS) -o $@
+
+# PQ_OPS_DEPS := src/pq_ops.cpp
+# lib/pq_ops.so: $(PQ_OPS_DEPS)
+# 	$(OP_BUILD_COMMAND) $(PQ_OPS_DEPS) -o $@
+
 
 .PHONY: ops
 ops: $(OPS_LIBS)

@@ -1,3 +1,7 @@
+//
+//  exampe_ops.cpp
+//  Copyright © 2019 D Blalock. All rights reserved.
+//
 
 #include "tensorflow/core/framework/op.h"
 #include "tensorflow/core/framework/op_kernel.h"
