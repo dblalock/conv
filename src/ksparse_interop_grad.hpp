@@ -14,7 +14,7 @@
 
 // packed errs from output x group_sz -> dense grads for input
 // conveniently, this is just a call to sparse2dense()
-template<class Data>
+template<class DataT>
 static const void dense2sparse_nhwc_grad(const DataT* errs_data, int nimgs,
     int img_nrows, int img_ncols, int img_ngroups, uint8_t log2_group_sz,
     DataT* grad_data, bool zero_out=true)
@@ -38,6 +38,7 @@ static const void sparse2dense_nhwc_grad(const DataT* in_packed,
     uint8_t log2_group_sz,
     const DataT* errs_data, DataT* grad_data, bool zero_out=true)
 {
+    const int nbits = log2_group_sz;
     auto group_sz = ((uint16_t)1) << log2_group_sz;
     auto in = ar::make_view(in_packed, nimgs, img_nrows, img_ncols, img_ngroups);
     auto errs = ar::make_view(errs_data, nimgs, img_nrows, img_ncols, img_ngroups, group_sz);
@@ -49,10 +50,10 @@ static const void sparse2dense_nhwc_grad(const DataT* in_packed,
     for (int n = 0; n < nimgs; n++) {
         for (int i = 0; i < img_nrows; i++) {
             for (int j = 0; j < img_ncols; j++) {
-                for (int g = 0; g < ngroups; g++) {
+                for (int g = 0; g < img_ngroups; g++) {
                     uint16_t idx;
                     DataT _;
-                    unpack_idx_val(in[{n, i, j, g}], &idx, &_);
+                    unpack_idx_val(in[{n, i, j, g}], nbits, &idx, &_);
                     auto errval = errs[{n, i, j, g, idx}];
                     grads[{n, i, j, g}] = errval;
                 }

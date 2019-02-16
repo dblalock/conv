@@ -78,6 +78,8 @@ static const void sparse2sparse_conv2d_nhwc_x_ghwc_valid(
     const CoeffT* filt_data, int filt_nrows, int filt_ncols,
     DataT* out_packed)
 {
+    const int in_nbits = in_log2_group_sz;
+    const int out_nbits = out_log2_group_sz;
     auto nrow_positions = img_nrows - filt_nrows + 1;
     auto ncol_positions = img_ncols - filt_ncols + 1;
     auto out_nrows = nrow_positions; // adjust if strided
@@ -101,16 +103,17 @@ static const void sparse2sparse_conv2d_nhwc_x_ghwc_valid(
                 // compute max activation in each group
                 for (int g = 0; g < out_ngroups; g++) {
                     auto max_act = min_possible_activation;
-                    for (int gg = 0; gg < out_group_sz; gg++) {
+                    for (uint16_t gg = 0; gg < out_group_sz; gg++) {
                         // compute activation for one output neuron in group
                         DataT act = 0;
                         for (int ii = 0; ii < filt_nrows; ii++) {
                             for (int jj = 0; jj < filt_ncols; jj++) {
+                                #pragma unroll
                                 for (int c = 0; c < in_ngroups; c++) {
                                     DataT in_act;
                                     uint16_t cc;
                                     unpack_idx_val(in[{n, i+ii, j+jj, c}],
-                                        &cc, &in_act);
+                                        in_nbits, &cc, &in_act);
                                     auto coeff = filt[{g, gg, ii, jj, c, cc}];
                                     act += in_act * coeff;
                                 }
@@ -118,7 +121,7 @@ static const void sparse2sparse_conv2d_nhwc_x_ghwc_valid(
                         }
                         // compare this neuron to max activation so far; we
                         // do max on packed repr to avoid conditional branch
-                        act = pack_idx_val(gg, act);
+                        act = pack_idx_val(out_nbits, gg, act);
                         max_act = MAX(max_act, act);
                     }
                     out[{n, i, j, g}] = max_act;

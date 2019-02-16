@@ -18,21 +18,6 @@ TEST(Sanity, EigenTensor) {
     EXPECT_EQ(X.dimensions()[1], 3);
 }
 
-// class NaiveConvTest : public ::testing::Test {
-
-//     NaiveConvTest() {
-
-//     }
-
-//     auto nrows = 2;
-//     auto ncols = 3;
-//     Ar2D<float> X(nrows, ncols);
-//     Ar2D<float> filt(1, 1);
-//     Ar2D<float> out(nrows, ncols);
-//     Ar2D<float> ans(nrows, ncols);
-// };
-
-
 
 TEST(DirectConv, 2dx2d_rowmajor) {
     auto nrows = 2;

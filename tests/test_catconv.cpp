@@ -8,13 +8,6 @@
 #include <gtest/gtest.h>
 #include "testing_utils.hpp"
 
-// #include "../src/eigen/unsupported/Eigen/CXX11/Tensor"
-
-// template<class DataT> using Ar2D = Eigen::Tensor<DataT, 2, Eigen::RowMajor>;
-// template<class DataT> using Ar3D = Eigen::Tensor<DataT, 3, Eigen::RowMajor>;
-// template<class DataT> using Ar4D = Eigen::Tensor<DataT, 4, Eigen::RowMajor>;
-
-
 TEST(CatConv, SmokeTest) {
     auto x = 5;
     EXPECT_EQ(x, 5);

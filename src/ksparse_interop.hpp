@@ -40,17 +40,21 @@
 
 
 
-template<int Log2GroupSz, class DataT>
+// template<class DataT=void>
+template<int Log2GroupSz=-1, class DataT=void>
 static const void dense2sparse_nhwc(const DataT* img_data, int nimgs,
-    int img_nrows, int img_ncols, int img_nchan, DataT* out_data)
+    int img_nrows, int img_ncols, int img_nchan,
+    DataT* out_data, uint8_t log2_group_sz=0)
 {
-    static_assert(Log2GroupSz <= 15, "Max Group Size is 1 << 15");
-    const int group_sz = 1 << Log2GroupSz;
+    // static_assert(Log2GroupSz <= 15, "Max Group Size is 1 << 15");
+    const int nbits = Log2GroupSz > 0 ? Log2GroupSz : log2_group_sz;
+    assert(nbits > 0); // must specify group sz either statically or dynamically
+    const int group_sz = 1 << nbits;
     const int ngroups = img_nchan / group_sz;
-    assert(ngroups * group_sz == img_nchan); // TODO allow unequel grp sizes
+    assert(ngroups * group_sz == img_nchan); // TODO allow unequel group sizes
 
     auto in = ar::make_view(img_data, nimgs, img_nrows, img_ncols, ngroups, group_sz);
-    auto out = ar::make_view(img_data, nimgs, img_nrows, img_ncols, ngroups);
+    auto out = ar::make_view(out_data, nimgs, img_nrows, img_ncols, ngroups);
 
     for (int n = 0; n < nimgs; n++) {
         for (int i = 0; i < img_nrows; i++) {
@@ -63,37 +67,45 @@ static const void dense2sparse_nhwc(const DataT* img_data, int nimgs,
                     // that low bits will get thrown away either
                     // way (although not 100% certain it's true for floats)
                     auto maxval = in[{n, i, j, g, 0}];
-                    DataT packed_max = pack_idx_val(0, maxval);
-                    #pragma unroll
-                    for (int gg = 1; gg < group_sz; gg++) {
+                    // printf("got first maxval: %g\n", (float)maxval);
+                    DataT packed_max = pack_idx_val(nbits, (uint8_t)0, maxval);
+                    // printf("first packed_max: %g\n", (float)packed_max);
+                    // #pragma unroll
+                    for (uint16_t gg = 1; gg < group_sz; gg++) {
                         auto val = in[{n, i, j, g, gg}];
-                        auto packed_val = pack_idx_val(gg, val);
+                        auto packed_val = pack_idx_val(nbits, gg, val);
                         packed_max = MAX(packed_max, packed_val);
                     }
+                    // printf("writing out packed_max: %g\n", (float)packed_max);
                     out[{n, i, j, g}] = packed_max;
                 }
             }
         }
     }
 }
-template<class DataT>
-static const void sparse2dense_nhwc(const DataT* in_packed,
+// template<class DataT>
+template<int Log2GroupSz=-1, class DataT=void>
+static const void sparse2dense_nhwc(
+    const DataT* in_packed,
     int nimgs, int img_nrows, int img_ncols, int img_ngroups,
-    uint8_t log2_group_sz, DataT* out_data, bool zero_out=true)
+    DataT* out_data, uint8_t log2_group_sz=-1, bool zero_out=true)
 {
-    auto group_sz = ((uint16_t)1) << log2_group_sz;
+    const int nbits = Log2GroupSz > 0 ? Log2GroupSz : log2_group_sz;
+    assert(nbits > 0); // must specify group sz either statically or dynamically
+    auto group_sz = ((uint16_t)1) << nbits;
     auto in = ar::make_view(in_packed, nimgs, img_nrows, img_ncols, img_ngroups);
-    auto out = ar::make_view(in_packed, nimgs, img_nrows, img_ncols, img_ngroups, group_sz);
+    auto out = ar::make_view(out_data, nimgs, img_nrows, img_ncols, img_ngroups, group_sz);
     if (zero_out) {
         out.setZero();
     }
     for (int n = 0; n < nimgs; n++) {
         for (int i = 0; i < img_nrows; i++) {
             for (int j = 0; j < img_ncols; j++) {
-                for (int g = 0; g < ngroups; g++) {
+                for (int g = 0; g < img_ngroups; g++) {
                     uint16_t idx;
                     DataT val;
-                    unpack_idx_val(in[{n, i, j, g}], &idx, &val);
+                    unpack_idx_val(in[{n, i, j, g}], nbits, &idx, &val);
+                    // printf("unpacked to idx, val: %u, %g\n", idx, (float)val);
                     out[{n, i, j, g, idx}] = val;
                 }
             }

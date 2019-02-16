@@ -15,6 +15,7 @@ TF_LFLAGS := $(shell python -c 'import tensorflow as tf; print(" ".join(tf.sysco
 LDFLAGS := -lgtest -lbenchmark -lpthread -L/usr/lib
 
 TEST_FILES := tests/tests_main.o tests/test_direct_conv.o tests/test_catconv.o
+TEST_FILES += tests/test_ksparse_interop.o
 BENCHMARK_FILES := bench/benchmarks_main.o bench/benchmark_dummy.o
 
 TESTS_BINARY := bin/tests.out
@@ -32,6 +33,10 @@ tests/test_direct_conv.o: tests/test_direct_conv.cpp src/direct_conv.hpp
 	$(CXX) $(CXXFLAGS) $< -c -o $@
 
 tests/test_catconv.o: tests/test_catconv.cpp src/catconv.hpp
+	$(CXX) $(CXXFLAGS) $< -c -o $@
+
+tests/test_ksparse_interop.o.o: tests/test_ksparse_interop.cpp \
+	src/ksparse_interop.hpp src/ksparse_util.hpp
 	$(CXX) $(CXXFLAGS) $< -c -o $@
 
 tests: $(TEST_FILES)
