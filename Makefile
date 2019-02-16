@@ -15,7 +15,7 @@ TF_LFLAGS := $(shell python -c 'import tensorflow as tf; print(" ".join(tf.sysco
 LDFLAGS := -lgtest -lbenchmark -lpthread -L/usr/lib
 
 TEST_FILES := tests/tests_main.o tests/test_direct_conv.o tests/test_catconv.o
-TEST_FILES += tests/test_ksparse_interop.o
+TEST_FILES += tests/test_ksparse_interop.o tests/test_ksparse_conv.o
 BENCHMARK_FILES := bench/benchmarks_main.o bench/benchmark_dummy.o
 
 TESTS_BINARY := bin/tests.out

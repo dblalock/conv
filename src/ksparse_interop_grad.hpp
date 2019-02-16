@@ -55,7 +55,7 @@ static const void sparse2dense_nhwc_grad(const DataT* in_packed,
                     DataT _;
                     unpack_idx_val(in[{n, i, j, g}], nbits, &idx, &_);
                     auto errval = errs[{n, i, j, g, idx}];
-                    grads[{n, i, j, g}] = errval;
+                    grads[{n, i, j, g}] = pack_idx_val(nbits, idx, errval);
                 }
             }
         }

@@ -86,9 +86,9 @@ static const void dense2sparse_nhwc(const DataT* img_data, int nimgs,
 // template<class DataT>
 template<int Log2GroupSz=-1, class DataT=void>
 static const void sparse2dense_nhwc(
-    const DataT* in_packed,
-    int nimgs, int img_nrows, int img_ncols, int img_ngroups,
-    DataT* out_data, uint8_t log2_group_sz=-1, bool zero_out=true)
+    const DataT* in_packed, int nimgs, int img_nrows, int img_ncols,
+    int img_ngroups, uint8_t log2_group_sz,
+    DataT* out_data, bool zero_out=true)
 {
     const int nbits = Log2GroupSz > 0 ? Log2GroupSz : log2_group_sz;
     assert(nbits > 0); // must specify group sz either statically or dynamically

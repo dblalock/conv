@@ -72,10 +72,9 @@
 
 template<class DataT, class CoeffT>
 static const void sparse2sparse_conv2d_nhwc_x_ghwc_valid(
-    int out_ngroups, int in_log2_group_sz,
-    int in_ngroups, int out_log2_group_sz,
     const DataT* in_packed, int nimgs, int img_nrows, int img_ncols,
-    const CoeffT* filt_data, int filt_nrows, int filt_ncols,
+    const CoeffT* filt_data, int out_ngroups, int in_log2_group_sz,
+    int filt_nrows, int filt_ncols, int in_ngroups, int out_log2_group_sz,
     DataT* out_packed)
 {
     const int in_nbits = in_log2_group_sz;
