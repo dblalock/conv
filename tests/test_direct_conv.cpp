@@ -1,13 +1,9 @@
 
-#include <gtest/gtest.h>
-#include "../src/eigen/Eigen/Core"
-#include "../src/eigen/unsupported/Eigen/CXX11/Tensor"
-
 #include "../src/direct_conv.hpp"
 
-template<class DataT> using Ar2D = Eigen::Tensor<DataT, 2, Eigen::RowMajor>;
-template<class DataT> using Ar3D = Eigen::Tensor<DataT, 3, Eigen::RowMajor>;
-template<class DataT> using Ar4D = Eigen::Tensor<DataT, 4, Eigen::RowMajor>;
+#include <gtest/gtest.h>
+#include "testing_utils.hpp"
+
 
 TEST(DirectConv, DidItWork) {
     auto x = 5;

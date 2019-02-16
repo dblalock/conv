@@ -8,6 +8,14 @@
 
 #include <stdio.h>
 
+#include "../src/eigen/Eigen/Core"
+#include "../src/eigen/unsupported/Eigen/CXX11/Tensor"
+
+template<class DataT> using Ar2D = Eigen::Tensor<DataT, 2, Eigen::RowMajor>;
+template<class DataT> using Ar3D = Eigen::Tensor<DataT, 3, Eigen::RowMajor>;
+template<class DataT> using Ar4D = Eigen::Tensor<DataT, 4, Eigen::RowMajor>;
+template<class DataT> using Ar5D = Eigen::Tensor<DataT, 5, Eigen::RowMajor>;
+
 // what I should do is figure out how to slice this such that it returns
 // a tensor of lower rank and implement one recursive function; but the
 // eigen tensor API sucks, so longer, hackier code it is
