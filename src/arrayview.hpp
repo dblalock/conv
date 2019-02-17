@@ -229,7 +229,7 @@ struct ArrayView {
         return sz;
     }
 
-    void setValue(DataT val) {
+    void setConstant(DataT val) {
         static_assert(fmt_traits::is_contig,
             "setValue() only implemented for dense arrayviews!");
         if (fmt_traits::is_contig) {

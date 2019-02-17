@@ -115,7 +115,7 @@ void argmax_nchw_activations(
 
     for (int n = 0; n < nimgs; n++) { // each img
         for (int g = 0; g < out_nvars; g++) { // each output channel
-            maxes.setValue(std::numeric_limits<ExcitationT>::lowest());
+            maxes.setConstant(std::numeric_limits<ExcitationT>::lowest());
             for (IdxT c = 0; c < group_sz; c++) { // each neuron in group
                 for (int i = 0; i < nrows; i++) { // each row
                     for (int j = 0; j < ncols; j++) { // each col
