@@ -3,6 +3,7 @@
 //  Copyright © 2019 D Blalock. All rights reserved.
 //
 
+#include "../src/ksparse_util.hpp"
 #include "../src/ksparse_interop.hpp"
 #include "../src/ksparse_interop_grad.hpp"
 
@@ -12,8 +13,6 @@
 template<class DataT>
 void populate_x(Ar5D<DataT>& X, DataT maxval) {
     // argmax in each group should be at idx (n + i + j) % group_sz
-    // we also set all the other indices to a constant so that we can
-    // check that the output is correct easily
     auto shape = X.dimensions();
     auto nimgs = shape[0];
     auto nrows = shape[1];
@@ -34,6 +33,41 @@ void populate_x(Ar5D<DataT>& X, DataT maxval) {
             }
         }
     }
+}
+
+
+template<class DataT, class IdxT, class OutIdxT=IdxT>
+void test_pack_unpack(DataT x=8, IdxT idx=1, uint8_t nbits=2, bool expect_gt=false) {
+    DataT x_packed = pack_idx_val(nbits, idx, x);
+    DataT x_hat;
+    OutIdxT idx_hat;
+    unpack_idx_val(x_packed, nbits, &idx_hat, &x_hat);
+    // std::cout << "x_packed=" << x_packed;
+    EXPECT_EQ(idx, idx_hat) << " x=" << x << " x_hat=" << x_hat
+            << " idx=" << idx << " idx_hat=" << idx_hat <<
+            " DataT=" << as_str<DataT>::value << "\n";
+    if (expect_gt) {
+        // this happens when low bits of x get clobbered by idx
+        EXPECT_GT(x, x_hat) << " x=" << x << " x_hat=" << x_hat
+            << " idx=" << idx << " idx_hat=" << idx_hat <<
+            " DataT=" << as_str<DataT>::value << "\n";
+    } else {
+        EXPECT_EQ(x, x_hat) << " x=" << x << " x_hat=" << x_hat
+            << " idx=" << idx << " idx_hat=" << idx_hat <<
+            " DataT=" << as_str<DataT>::value << "\n";
+    }
+}
+
+TEST(KSparseUtil, PackAndUnpack) {
+    test_pack_unpack<uint8_t, uint8_t>(8, 3, 2);
+    test_pack_unpack<uint16_t, uint8_t>(8, 5, 3);
+    test_pack_unpack<uint32_t, uint8_t>(8, 1, 1);
+    test_pack_unpack<float, uint8_t>(8, 0, 2);
+    test_pack_unpack<float, uint16_t>(8, 7, 3);
+
+    // vals that use bits that get clobbered should fail
+    test_pack_unpack<uint16_t, uint8_t>(1, 3, 2, true);
+    test_pack_unpack<uint16_t, uint8_t>(15, 3, 2, true);
 }
 
 TEST(KSparseInterop, Forward) {
@@ -132,7 +166,8 @@ TEST(KSparseInterop, Backward) {
         for (int i = 0; i < nrows; i++) {
             for (int j = 0; j < ncols; j++) {
                 for (int c = 0; c < ngroups; c++) {
-                    EXPECT_EQ(errs(n, i, j, c), errs2(n, i, j, c));                }
+                    EXPECT_EQ(errs(n, i, j, c), errs2(n, i, j, c));
+                }
             }
         }
     }

@@ -49,5 +49,16 @@ struct scalar_traits {
 };
 
 
+template<class T> struct as_str {};
+template<> struct as_str<uint8_t>  { static constexpr const char* value = "u8";  };
+template<> struct as_str<uint16_t> { static constexpr const char* value = "u16"; };
+template<> struct as_str<uint32_t> { static constexpr const char* value = "u32"; };
+template<> struct as_str<int8_t>   { static constexpr const char* value = "i8";  };
+template<> struct as_str<int16_t>  { static constexpr const char* value = "i16"; };
+template<> struct as_str<int32_t>  { static constexpr const char* value = "i32"; };
+template<> struct as_str<float>    { static constexpr const char* value = "f32"; };
+template<> struct as_str<double>   { static constexpr const char* value = "f64"; };
+
+
 
 #endif // _dtype_traits_hpp
