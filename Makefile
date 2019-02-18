@@ -36,7 +36,11 @@ tests/test_catconv.o: tests/test_catconv.cpp src/catconv.hpp
 	$(CXX) $(CXXFLAGS) $< -c -o $@
 
 tests/test_ksparse_interop.o.o: tests/test_ksparse_interop.cpp \
-	src/ksparse_interop.hpp src/ksparse_util.hpp
+	src/ksparse_interop.hpp src/ksparse_interop_grad.hpp src/ksparse_util.hpp
+	$(CXX) $(CXXFLAGS) $< -c -o $@
+
+tests/test_ksparse_interop.o.o: tests/test_ksparse_conv.cpp \
+	src/ksparse_conv.hpp src/ksparse_conv_grad.hpp src/ksparse_util.hpp
 	$(CXX) $(CXXFLAGS) $< -c -o $@
 
 tests: $(TEST_FILES)

@@ -10,6 +10,7 @@
 
 #include "arrayview.hpp"
 #include "dtype_traits.hpp"
+#include "ksparse_util.hpp"
 #include "macros.hpp"  // for type traits macros
 
 // template<class DataT, class CoeffT,
@@ -73,8 +74,8 @@
 template<class DataT, class CoeffT>
 static const void sparse2sparse_conv2d_nhwc_x_ghwc_valid(
     const DataT* in_packed, int nimgs, int img_nrows, int img_ncols,
-    const CoeffT* filt_data, int out_ngroups, int in_log2_group_sz,
-    int filt_nrows, int filt_ncols, int in_ngroups, int out_log2_group_sz,
+    const CoeffT* filt_data, int out_ngroups, int out_log2_group_sz,
+    int filt_nrows, int filt_ncols, int in_ngroups, int in_log2_group_sz,
     DataT* out_packed)
 {
     const int in_nbits = in_log2_group_sz;
@@ -120,6 +121,7 @@ static const void sparse2sparse_conv2d_nhwc_x_ghwc_valid(
                         }
                         // compare this neuron to max activation so far; we
                         // do max on packed repr to avoid conditional branch
+                        // printf("(g, gg)=(%d,%d): raw act = %g\n", g, gg, act);
                         act = pack_idx_val(out_nbits, gg, act);
                         max_act = MAX(max_act, act);
                     }
