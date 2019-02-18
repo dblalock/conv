@@ -98,8 +98,8 @@ static const void sparse2sparse_conv2d_nhwc_x_ghwc_valid(
     auto min_possible_activation = std::numeric_limits<DataT>::lowest();
 
     for (int n = 0; n < nimgs; n++) {
-        for (int i = 0; i < nrow_positions; i++) {
-            for (int j = 0; j < ncol_positions; j++) {
+        for (int i = 0; i < out_nrows; i++) {
+            for (int j = 0; j < out_ncols; j++) {
                 // compute max activation in each group
                 for (int g = 0; g < out_ngroups; g++) {
                     auto max_act = min_possible_activation;
